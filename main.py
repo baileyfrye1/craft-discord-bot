@@ -22,16 +22,20 @@ async def check_product_status():
                 resp = await http_client.get(
                     "https://www.craftclubco.com/products/ice-storm-moss-coaster-kit"
                 )
-                soup = BeautifulSoup(resp.text, "html.parser")
 
-                sold_out_badge = soup.find("sold-out-badge")
-
-                if sold_out_badge and not sold_out_badge.has_attr("hidden"):
-                    print(f"{soup.title.string} is sold out, skipping")
+                if resp.status_code == 404:
+                    print("Page could not be loaded, skipping")
                 else:
-                    await client.send_message(
-                        f"{soup.title.string} is available: \n{resp.url}"
-                    )
+                    soup = BeautifulSoup(resp.text, "html.parser")
+
+                    sold_out_badge = soup.find("sold-out-badge")
+
+                    if sold_out_badge and not sold_out_badge.has_attr("hidden"):
+                        print(f"{soup.title.string} is sold out, skipping")
+                    else:
+                        await client.send_message(
+                            f"{soup.title.string} is available: \n{resp.url}"
+                        )
             except Exception as e:
                 logger.error(f"Error checking product: {e}")
 
